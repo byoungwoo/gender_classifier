@@ -31,4 +31,6 @@ private:
   cv::Point nose;
 };
 
+
+
 #endif /* _FEATURE_DETECTOR_H_ */

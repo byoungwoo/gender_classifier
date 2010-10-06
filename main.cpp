@@ -7,50 +7,21 @@
 
 #include "mac_camera.h"
 #include "face_detector.h"
+#include "face_normalizer.h"
 #include "feature_detector.h"
+#include "feature_detector_task.h"
 
-struct FaceDescriptor {
-  cv::Rect faceBounds;
-  cv::Point leftEye;
-  cv::Point rightEye;
-  cv::Point mouth;
-  cv::Point nose;
-};
-
-struct FaceDetectorTask {
-  explicit FaceDetectorTask(FaceDetector *faceDetector = 0,
-                            FeatureDetector *featureDetector = 0)
-  : faceDetector(faceDetector),
-    featureDetector(featureDetector), 
-    image() {}
-
-  FaceDescriptor operator()() {
-    FaceDescriptor descriptor;
-    if(faceDetector && featureDetector && !image.empty()) {
-      descriptor.faceBounds = faceDetector->Detect(image);
-      cv::Mat face = image(descriptor.faceBounds);
-      descriptor.leftEye = featureDetector->LocateLeftEye(face); 
-      descriptor.rightEye = featureDetector->LocateRightEye(face); 
-      // descriptor.mouth = featureDetector->LocateMouth(face); 
-      // descriptor.nose = featureDetector->LocateNose(face); 
-    }
-    return descriptor;
-  }
-
-  FaceDetector *faceDetector;
-  FeatureDetector *featureDetector;
-  cv::Mat image;
-};
 
 int main( int argc, char** argv )
 try {
   MacCamera camera;
   FaceDetector faceDetector;
   FeatureDetector featureDetector;
-  FaceDetectorTask faceDetectorTask(&faceDetector, &featureDetector);
+  FeatureDetectorTask featureDetectorTask(&faceDetector, &featureDetector);
 
   cv::namedWindow("video");
-  cv::namedWindow("face");
+  cv::namedWindow("detected face");
+  cv::namedWindow("transformed face");
 
   char key;
   boost::unique_future<FaceDescriptor> future;
@@ -67,15 +38,19 @@ try {
         cv::Mat face = frame(descriptor.faceBounds);
         cv::rectangle(face, descriptor.leftEye, descriptor.leftEye + delta, white);
         cv::rectangle(face, descriptor.rightEye, descriptor.rightEye + delta, white);
-        // cv::rectangle(face, descriptor.mouth, descriptor.mouth, white);
-        // cv::rectangle(face, descriptor.nose, descriptor.nose, white);
-        cv::imshow("face", face);
+        cv::rectangle(face, descriptor.mouth, descriptor.mouth + delta, white);
+        cv::imshow("detected face", face);
       }
+      if(FaceNormalizer::ValidateFaceDescriptor(descriptor) == FaceNormalizer::VALID) {
+        cv::Mat transformedFace = FaceNormalizer::Normalize(face, descriptor);
+        cv::imshow("transformed face", transformedFace);
+      }
+      
     }
 
     if(future.is_ready() || future.get_state() == boost::future_state::uninitialized) {
-      faceDetectorTask.image = frame;
-      boost::packaged_task<FaceDescriptor> packagedTask(faceDetectorTask);
+      featureDetectorTask.image = frame;
+      boost::packaged_task<FaceDescriptor> packagedTask(featureDetectorTask);
       future = packagedTask.get_future();
       boost::thread task(boost::move(packagedTask));
     }
