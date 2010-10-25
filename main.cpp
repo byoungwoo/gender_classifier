@@ -36,14 +36,14 @@ try {
       cv::Point delta(5, 5);
       if(descriptor.faceBounds.area()) {
         cv::Mat face = frame(descriptor.faceBounds);
+        if(FaceNormalizer::ValidateFaceDescriptor(descriptor) == FaceNormalizer::VALID) {
+          cv::Mat transformedFace = FaceNormalizer::Normalize(face, descriptor);
+          cv::imshow("transformed face", transformedFace);
+        }
         cv::rectangle(face, descriptor.leftEye, descriptor.leftEye + delta, white);
         cv::rectangle(face, descriptor.rightEye, descriptor.rightEye + delta, white);
         cv::rectangle(face, descriptor.mouth, descriptor.mouth + delta, white);
         cv::imshow("detected face", face);
-      }
-      if(FaceNormalizer::ValidateFaceDescriptor(descriptor) == FaceNormalizer::VALID) {
-        cv::Mat transformedFace = FaceNormalizer::Normalize(face, descriptor);
-        cv::imshow("transformed face", transformedFace);
       }
       
     }
