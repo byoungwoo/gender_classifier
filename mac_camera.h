@@ -11,11 +11,10 @@ public:
   MacCamera();
   ~MacCamera();
 
-  void Retrieve(cv::Mat &matrix);
+  void Retrieve(cv::Mat *image);
 
 private:
   CvCapture *capture;
-  IplImage *frame;
 };
  
 

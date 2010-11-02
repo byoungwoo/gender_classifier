@@ -92,10 +92,11 @@ cv::Mat Normalize(const cv::Mat &image, const FaceDescriptor &descriptor) {
 
   cv::Mat rotationMatrix = cv::getRotationMatrix2D(realCenter, rotateAngle,
                                                    scale);
+  cv::Mat grayImage;
+  cv::cvtColor(image, grayImage, CV_RGB2GRAY);
   cv::Mat transformedImage;
-  cv::warpAffine(image, transformedImage, rotationMatrix,
-                 cv::Size(image.cols , image.rows));
-
+  cv::warpAffine(grayImage, transformedImage, rotationMatrix,
+                 cv::Size(image.cols, image.rows));
   cv::Rect clipper(realCenter.x - idealCenter.x,
                    realCenter.y - idealCenter.y,
                    PRINT_SIZE.width, PRINT_SIZE.height);
@@ -108,8 +109,7 @@ cv::Mat Normalize(const cv::Mat &image, const FaceDescriptor &descriptor) {
   cv::Mat scaledMask;
   cv::resize(mask, scaledMask, PRINT_SIZE);
 
-  cv::subtract(equalizedImage, scaledMask, normalizedImage);
-
+  cv::subtract(clippedImage, scaledMask, normalizedImage);
 
   return normalizedImage;
 }

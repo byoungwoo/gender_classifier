@@ -14,14 +14,14 @@ FaceDescriptor FeatureDetectorTask::operator()() {
 
     // Left eye
     cv::Rect leftEyeRegion(faceRegion.x, faceRegion.y,
-                           faceRegion.width / 2, faceRegion.height / 2);
+                           faceRegion.width / 2, faceRegion.height * 2 / 3);
     if(leftEyeRegion.area()) {
       descriptor.leftEye = featureDetector->LocateLeftEye(image(leftEyeRegion));
     }
     
     //Right eye
     cv::Rect rightEyeRegion(faceRegion.x + faceRegion.width / 2, faceRegion.y,
-                            faceRegion.width / 2, faceRegion.height / 2);
+                            faceRegion.width / 2, faceRegion.height * 2 / 3);
     if(rightEyeRegion.area()) {
       descriptor.rightEye = featureDetector->LocateLeftEye(image(rightEyeRegion)) +
         cv::Point(faceRegion.width / 2, 0);

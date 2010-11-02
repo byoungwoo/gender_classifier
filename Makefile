@@ -1,7 +1,7 @@
 LINK		= g++
 
 INCPATH 	= -I/opt/local/include/ -I/usr/include/boost_1_44_0/
-LIBS		= -L/opt/local/lib/ -lcxcore -lcv -lhighgui -L/usr/include/boost_1_44_0/stage/lib -lboost_thread 
+LIBS		= -L/opt/local/lib/ -lcxcore -lcv -lhighgui -lml -L/usr/include/boost_1_44_0/stage/lib -lboost_thread 
 
 SOURCES		= face_detector.cpp \
 		face_normalizer.cpp \
