@@ -96,10 +96,12 @@ cv::Mat Normalize(const cv::Mat &image, const FaceDescriptor &descriptor) {
   cv::cvtColor(image, grayImage, CV_RGB2GRAY);
   cv::Mat transformedImage;
   cv::warpAffine(grayImage, transformedImage, rotationMatrix,
-                 cv::Size(image.cols, image.rows));
+                 image.size());
   cv::Rect clipper(realCenter.x - idealCenter.x,
                    realCenter.y - idealCenter.y,
                    PRINT_SIZE.width, PRINT_SIZE.height);
+  cv::Rect imageRect = cv::Rect(cv::Point(0, 0), image.size());
+  clipper = imageRect & clipper;
   cv::Mat clippedImage = transformedImage(clipper);
   cv::Mat equalizedImage;
   cv::equalizeHist(clippedImage, equalizedImage);
@@ -107,7 +109,7 @@ cv::Mat Normalize(const cv::Mat &image, const FaceDescriptor &descriptor) {
   cv::Mat normalizedImage;
   cv::Mat mask = cv::imread("resources/face_mask2.bmp", LOAD_GRAY);
   cv::Mat scaledMask;
-  cv::resize(mask, scaledMask, PRINT_SIZE);
+  cv::resize(mask, scaledMask, clipper.size());
 
   cv::subtract(clippedImage, scaledMask, normalizedImage);
 

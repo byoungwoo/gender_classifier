@@ -1,0 +1,4 @@
+*.o
+colorferet
+train_data/raw
+train_data/normalized

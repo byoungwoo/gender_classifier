@@ -12,12 +12,13 @@
 #include "feature_detector.h"
 #include "feature_detector_task.h"
 
-
 const cv::Size THUMBNAIL_SIZE = cv::Size(13, 25);
 
 cv::Mat GetImageFeatures(const cv::Mat &image) {
   cv::Mat resizedImage;
   cv::resize(image, resizedImage, THUMBNAIL_SIZE);
+  cv::namedWindow("resized");
+  cv::imshow("resized", resizedImage);
   cv::Mat features(1, resizedImage.rows * resizedImage.cols,
                    CV_32FC1, image.data);
   float *feature = features.ptr<float>(0);
@@ -74,24 +75,28 @@ try {
           cv::imshow("transformed face", transformedFace);
 
           cv::Mat features = GetImageFeatures(transformedFace);
-          std::cout << classifier.predict(features) << std::endl;
+          int genderId = classifier.predict(features);
+          std::string gender = (genderId == 0) ? "Male" : "Female";
+          std::cout << gender << std::endl;
+          // cv::displayOverlay("video", gender, 2000);
 
-          cv::Mat grayFrame;
-          cv::cvtColor(frame, grayFrame, CV_RGB2GRAY);
-          cv::rectangle(grayFrame, descriptor.faceBounds, white);
-          cv::rectangle(grayFrame, normalDescriptor.leftEye,
-                        normalDescriptor.leftEye + delta, white);
-          cv::rectangle(grayFrame, normalDescriptor.rightEye,
-                        normalDescriptor.rightEye + delta, white);
-          cv::rectangle(grayFrame, normalDescriptor.mouth,
-                        normalDescriptor.mouth + delta, white);
-          cv::imshow("detected face", grayFrame);
+          // cv::Mat grayFrame;
+          // cv::cvtColor(frame, grayFrame, CV_RGB2GRAY);
+          // cv::rectangle(grayFrame, descriptor.faceBounds, white);
+          // cv::rectangle(grayFrame, normalDescriptor.leftEye,
+          //               normalDescriptor.leftEye + delta, white);
+          // cv::rectangle(grayFrame, normalDescriptor.rightEye,
+          //               normalDescriptor.rightEye + delta, white);
+          // cv::rectangle(grayFrame, normalDescriptor.mouth,
+          //               normalDescriptor.mouth + delta, white);
+          // cv::imshow("detected face", grayFrame);
         }
       }
       
     }
 
     if(future.is_ready() || future.get_state() == boost::future_state::uninitialized) {
+      
       featureDetectorTask.image = frame;
       boost::packaged_task<FaceDescriptor> packagedTask(featureDetectorTask);
       future = packagedTask.get_future();
